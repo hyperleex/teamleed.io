@@ -1,0 +1,40 @@
+version: '3.1'
+services:
+  ghost:
+    image: ghost:1-alpine
+    restart: always
+    ports:
+      - 8080:2368
+    volumes:
+      - ./blog/content:/var/lib/ghost/content
+    environment:
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: root
+      database__connection__password: example
+      database__connection__database: ghost
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ghost.entrypoints=http"
+      - "traefik.http.routers.ghost.rule=Host(`teamleed.io`)"
+      - "traefik.http.services.ghost.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.ghost-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.ghost.middlewares=ghost-https-redirect"
+      - "traefik.http.routers.ghost-secure.entrypoints=https"
+      - "traefik.http.routers.ghost-secure.rule=Host(`teamleed.io`)"
+      - "traefik.http.routers.ghost-secure.tls=true"
+      - "traefik.http.routers.ghost-secure.tls.certresolver=http"
+      - "traefik.http.routers.ghost-secure.service=ghost"
+      - "traefik.docker.network=traefik_proxy"
+    networks:
+      - default
+      - traefik_proxy
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
