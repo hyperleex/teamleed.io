@@ -1,0 +1,21 @@
+---
+- hosts: all
+  tasks:
+    - name: Create App Directory
+      file:
+        path: ~/blog
+        state: directory
+
+    - name: Ensure front is up-to-date
+      git:
+        repo: git@github.com:hyperleex/teamleed.io.git
+        dest: ~/blog
+        version: master
+        accept_hostkey: yes
+    - name: Restart services
+      become: true
+      docker_compose:
+        project_src: /home/ubuntu/blog
+        build: yes
+        restarted: yes
+      register: output
