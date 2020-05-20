@@ -6,6 +6,7 @@ services:
     volumes:
       - ./blog/content:/var/lib/ghost/content
     environment:
+      url: "https://teamleed.io/"
       database__client: mysql
       database__connection__host: db
       database__connection__user: root
